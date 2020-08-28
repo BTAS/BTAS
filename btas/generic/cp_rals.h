@@ -10,17 +10,10 @@
 #include <iostream>
 #include <vector>
 
-#include <btas/generic/cp.h>
-#include <btas/generic/default_random_seed.h>
-#include <btas/generic/core_contract.h>
-#include <btas/generic/flatten.h>
-#include <btas/generic/khatri_rao_product.h>
-#include <btas/generic/randomized.h>
-#include <btas/generic/swap.h>
-#include <btas/generic/tucker.h>
-#include <btas/generic/converge_class.h>
 #include <btas/generic/rals_helper.h>
-#include <btas/generic/reconstruct.h>
+
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
 
 #ifdef BTAS_HAS_INTEL_MKL
 #include <mkl_trans.h>
@@ -203,9 +196,9 @@ public:
             {
               auto lower_new = {zero, rank}, upper_new = {row_extent, rank_new};
               auto new_view = make_view(b.range().slice(lower_new, upper_new), b.storage());
-              std::mt19937 generator(random_seed_accessor());
-              std::uniform_real_distribution<> distribution(-1.0, 1.0);
-              for(auto iter = new_view.begin(); iter != new_view.end(); ++iter){
+              boost::random::mt19937 generator(random_seed_accessor());
+              boost::random::uniform_real_distribution<> distribution(-1.0, 1.0);
+              for (auto iter = new_view.begin(); iter != new_view.end(); ++iter) {
                 *(iter) = distribution(generator);
               }
             }
@@ -421,17 +414,17 @@ public:
           auto upper_bound = {R, ((R > SVD_rank) ? SVD_rank : R)};
           auto view = make_view(S.range().slice(lower_bound, upper_bound), S.storage());
           auto l_iter = lambda.begin();
-          for(auto iter = view.begin(); iter != view.end(); ++iter, ++l_iter){
+          for (auto iter = view.begin(); iter != view.end(); ++iter, ++l_iter) {
             *(l_iter) = *(iter);
           }
 
           A[i] = lambda;
         }
 
-        std::mt19937 generator(random_seed_accessor());
+        boost::random::mt19937 generator(random_seed_accessor());
+        boost::random::uniform_real_distribution<> distribution(-1.0, 1.0);
         // Fill the remaining columns in the set of factor matrices with dimension < SVD_rank with random numbers
-        std::uniform_real_distribution<> distribution(-1.0, 1.0);
-        for(auto& i: modes_w_dim_LT_svd) {
+        for (auto &i : modes_w_dim_LT_svd) {
           ind_t R = tensor_ref.extent(i), zero = 0;
           auto lower_bound = {zero, R};
           auto upper_bound = {R, SVD_rank};
@@ -473,11 +466,6 @@ public:
           if (i == 0) {
             Tensor a(Range{tensor_ref.range().range(j), Range1{rank_new}});
             a.fill(rand());
-//            std::mt19937 generator(random_seed_accessor());
-//            std::uniform_real_distribution<> distribution(-1.0, 1.0);
-//            for(auto iter = a.begin(); iter != a.end(); ++iter) {
-//              *(iter) = distribution(generator);
-//            }
             A.push_back(a);
             this->normCol(j);
           }
@@ -501,9 +489,9 @@ public:
             {
               auto lower_new = {zero, rank_old}, upper_new = {row_extent, rank_new};
               auto new_view = make_view(b.range().slice(lower_new, upper_new), b.storage());
-              std::mt19937 generator(random_seed_accessor());
-              std::uniform_real_distribution<> distribution(-1.0, 1.0);
-              for(auto iter = new_view.begin(); iter != new_view.end(); ++iter){
+              boost::random::mt19937 generator(random_seed_accessor());
+              boost::random::uniform_real_distribution<> distribution(-1.0, 1.0);
+              for (auto iter = new_view.begin(); iter != new_view.end(); ++iter) {
                 *(iter) = distribution(generator);
               }
             }
@@ -553,8 +541,8 @@ public:
     void build_random(ind_t rank, ConvClass &converge_test, bool direct, ind_t max_als,
                       bool calculate_epsilon, double &epsilon,
                       bool &fast_pI) override {
-      std::mt19937 generator(random_seed_accessor());
-      std::uniform_real_distribution<> distribution(-1.0, 1.0);
+      boost::random::mt19937 generator(random_seed_accessor());
+      boost::random::uniform_real_distribution<> distribution(-1.0, 1.0);
       for (size_t i = 0; i < this->ndim; ++i) {
         // If this mode is symmetric to a previous mode, set it equal to
         // previous mode, else make a random matrix.

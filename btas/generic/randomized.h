@@ -1,31 +1,34 @@
 #ifndef BTAS_RANDOMIZED_DECOMP_H
 #define BTAS_RANDOMIZED_DECOMP_H
 
-#include <btas/generic/core_contract.h>
 #include <btas/error.h>
-#include <btas/tensor.h>
-#include <btas/generic/linear_algebra.h>
 #include <btas/generic/contract.h>
+#include <btas/generic/core_contract.h>
+#include <btas/generic/linear_algebra.h>
+#include <btas/tensor.h>
 
-#include <random>
 #include <stdlib.h>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <random>
 #include <vector>
 
 namespace btas {
 
-/// \param[in,out] A In: An empty matrix of size column dimension of the nth
-/// mode flattened tensor provided to the randomized compression method by the
-/// desired rank of the randmoized compression method.  Out: A random matrix,
-/// column drawn from a random distribution and orthogonalized
-template <typename Tensor> void generate_random_metric(Tensor &A) {
+  /// \param[in,out] A In: An empty matrix of size column dimension of the nth
+  /// mode flattened tensor provided to the randomized compression method by the
+  /// desired rank of the randmoized compression method.  Out: A random matrix,
+  /// column drawn from a random distribution and orthogonalized
+  template <typename Tensor>
+  void generate_random_metric(Tensor &A) {
     using ind_t = typename Tensor::range_type::index_type::value_type;
     using value_type = typename Tensor::value_type;
     for (ind_t i = 0; i < A.extent(1); i++) {
       std::random_device rd;
       // uncomment for more randomness
       // std::mt19937 gen(rd());
-      std::mt19937 gen(1.0); // comment out for more randomness.
-      std::normal_distribution<value_type> distribution(0.0, 10.0);
+      boost::random::mt19937 gen(random_seed_accessor());
+      boost::random::uniform_real_distribution<> distribution(0.0, 10.0);
       value_type norm = 0.0;
       for (ind_t j = 0; j < A.extent(0); j++) {
         auto val = abs(distribution(gen));
