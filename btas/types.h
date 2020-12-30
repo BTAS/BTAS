@@ -55,6 +55,12 @@
 
 #else  // defined(BTAS_HAS_CBLAS) && defined(BTAS_HAS_LAPACKE)
 
+#if __has_include(<Accelerate/Accelerate.h>)
+
+#include <Accelerate/Accelerate.h>
+
+#else // __has_include(<Accelerate/Accelerate.h>)
+
 /// major order directive
 enum CBLAS_ORDER { CblasRowMajor, CblasColMajor };
 
@@ -69,6 +75,8 @@ enum CBLAS_DIAG { CblasNonUnit, CblasUnit };
 
 /// transposition directive for symmetric matrix (not used)
 enum CBLAS_SIDE { CblasLeft, CblasRight };
+
+#endif  // __has_include(<Accelerate/Accelerate.h>)
 
 #endif // defined(BTAS_HAS_CBLAS) && defined(BTAS_HAS_LAPACKE)
 
